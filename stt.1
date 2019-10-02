@@ -1,0 +1,35 @@
+.TH stt 1 stt\-VERSION
+.SH NAME
+stt \- Simple time tracker
+.SH SYNOPSIS
+.B stt
+.RB [ \-v ]
+.RB [ \-h ]
+.RB [ \-a
+.IR task " |"
+.RB \-s " |"
+.RB \-l ]
+.SH DESCRIPTION
+.B stt
+keeps track of tasks during a work day.
+.PP
+Without operand, day report is printed, as with
+.B -l
+option.
+.SH OPTIONS
+.TP
+.BI \-a " task"
+Registers given task as active. Will also stop previous active task.
+.TP
+.B \-s
+Stops current active task.
+.TP
+.B \-l
+Prints day report, for each tasks name, start time, end time or state if
+still running and duration (in decimal hours) is displayed.
+.TP
+.B \-h
+Prints synopsis help.
+.TP
+.B \-v
+Prints version information.
