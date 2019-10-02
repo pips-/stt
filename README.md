@@ -6,7 +6,7 @@ Simple Time Tracker
 Build & Install
 ---------------
 
-	$ make clean build
+	$ make clean stt
 	# make install
 
 Usage
