@@ -3,10 +3,11 @@ stt
 
 Simple Time Tracker
 
-Install
--------
+Build & Install
+---------------
 
-	  # make clean install
+	$ make clean build
+	# make install
 
 Usage
 -----
