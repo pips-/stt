@@ -17,6 +17,10 @@
 #define VERSION "dev"
 #endif
 
+#define free_and_null(x) do { \
+    if (x) { free (x); x = NULL; } \
+} while (0); 
+
 char           *argv0;
 
 static char    *timesfile = ".ttimes";
@@ -45,6 +49,7 @@ int 		timesnode_getbalance(struct timesnode *);
 struct timesnode *timesnode_rightrotate(struct timesnode *);
 struct timesnode *timesnode_leftrotate(struct timesnode *);
 void 		timesnode_print(struct timesnode *, time_t);
+void 		timesnode_free(struct timesnode *);
 
 void
 usage()
@@ -86,7 +91,7 @@ opentimesfile()
 struct timesnode *
 loadtimes(FILE * fp, struct timesnode * p)
 {
-	char           *readline, *line, *tmp;
+	char           *readline, *line, *tmp, *tmpline;
 	time_t 		starttime, endtime;
 	char           *task;
 	size_t 		linesize;
@@ -98,12 +103,15 @@ loadtimes(FILE * fp, struct timesnode * p)
 	linesize = 0;
 	while ((linelen = getline(&readline, &linesize, fp)) != -1) {
 		line = strdup(readline);
+        tmpline = line;                         /* Stores the pointer to allow buffer free */
 		tmp = strsep(&line, ";");
 		starttime = atoi(tmp);
 
 		if (starttime == 0) {
+            free_and_null (tmpline);
 			continue;
 		}
+
 		tmp = strsep(&line, ";");
 		endtime = atoi(tmp);
 
@@ -111,7 +119,12 @@ loadtimes(FILE * fp, struct timesnode * p)
 		task[strlen(task) - 1] = '\0';
 
 		p = timesnode_add(p, task, starttime, endtime);
+
+        free_and_null (task);
+        free_and_null (tmpline);
 	}
+
+    free_and_null (readline);
 
 	return p;
 }
@@ -291,6 +304,23 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 	}
 }
 
+void 
+timesnode_free (struct timesnode *p) 
+{
+    if (p->left) {
+        timesnode_free (p->left);
+        p->left = NULL;
+    }
+
+    if (p->right) {
+        timesnode_free (p->right);
+        p->right = NULL;
+    }
+
+    free_and_null (p->task);
+    free_and_null (p);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -362,5 +392,12 @@ default:
 
 		timesnode_print(timestree, mktime(&today));
 	}
+
+    fclose (fp);
+
+    timesnode_free (timestree);
+
+    free_and_null (nowtime);
+
 	return 0;
 }
