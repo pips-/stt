@@ -1,3 +1,7 @@
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -121,7 +125,7 @@ writetimes(FILE * fp, struct timesnode * p)
 	if (p->left != NULL) {
 		writetimes(fp, p->left);
 	}
-	fprintf(fp, "%lld;%lld;%s\n", p->starttime, p->endtime, p->task);
+	fprintf(fp, "%ld;%ld;%s\n", p->starttime, p->endtime, p->task);
 
 	if (p->right != NULL) {
 		writetimes(fp, p->right);
