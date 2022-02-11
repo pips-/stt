@@ -1,6 +1,6 @@
 #ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
-#endif 
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@
 
 #define free_and_null(x) do { \
     if (x) { free (x); x = NULL; } \
-} while (0); 
+} while (0);
 
 char           *argv0;
 
@@ -304,8 +304,8 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 	}
 }
 
-void 
-timesnode_free (struct timesnode *p) 
+void
+timesnode_free (struct timesnode *p)
 {
     if (p->left) {
         timesnode_free (p->left);
