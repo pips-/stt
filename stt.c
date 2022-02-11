@@ -72,8 +72,9 @@ opentimesfile()
 		//oldcwd = dirfd(opendir("."));
 
 		passwd = getpwuid(getuid());
-		chdir(passwd->pw_dir);
-
+		if (chdir(passwd->pw_dir) == -1) {
+			perror("chdir failed");
+		}
 		fp = fopen(timesfile, "a+");
 
 		if (fp == NULL) {
@@ -377,7 +378,9 @@ default:
 		changed = 1;
 	}
 	if (changed) {
-		freopen(timesfile, "w", fp);
+		if (freopen(timesfile, "w", fp) == NULL) {
+			perror("reopen failed");
+		}
 		writetimes(fp, timestree);
 	}
 	if (list) {
