@@ -48,7 +48,7 @@ int 		timesnode_heigh(struct timesnode *);
 int 		timesnode_getbalance(struct timesnode *);
 struct timesnode *timesnode_rightrotate(struct timesnode *);
 struct timesnode *timesnode_leftrotate(struct timesnode *);
-void 		timesnode_print(struct timesnode *, time_t);
+int 		timesnode_print(struct timesnode *, time_t);
 void 		timesnode_free(struct timesnode *);
 
 void
@@ -266,17 +266,18 @@ timesnode_stop(struct timesnode * p, time_t endtime)
 	return p;
 }
 
-void
+int
 timesnode_print(struct timesnode * p, time_t aftertime)
 {
 	time_t         *nowtime;
 	int 		duration = 0;
+	int 		totalDuration = 0;
 
 	if (p == NULL) {
-		return;
+		return 0;
 	}
 	if (p->left != NULL) {
-		timesnode_print(p->left, aftertime);
+		totalDuration += timesnode_print(p->left, aftertime);
 	}
 	if (p->starttime > aftertime || p->endtime > aftertime || p->endtime == 0) {
 		printf("task: %s\n", p->task);
@@ -298,10 +299,13 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 			printf("duration(hours): %.2f\n\n", duration / 3600.0);
 			free(nowtime);
 		}
+
+		totalDuration += duration;
 	}
 	if (p->right != NULL) {
-		timesnode_print(p->right, aftertime);
+		totalDuration += timesnode_print(p->right, aftertime);
 	}
+	return totalDuration;
 }
 
 void
@@ -390,7 +394,7 @@ default:
 		today.tm_min = 0;
 		today.tm_hour = 0;
 
-		timesnode_print(timestree, mktime(&today));
+		printf("total: %.2f\n", timesnode_print(timestree, mktime(&today)) / 3600.0);
 	}
 	fclose(fp);
 
