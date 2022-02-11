@@ -103,15 +103,14 @@ loadtimes(FILE * fp, struct timesnode * p)
 	linesize = 0;
 	while ((linelen = getline(&readline, &linesize, fp)) != -1) {
 		line = strdup(readline);
-        tmpline = line;                         /* Stores the pointer to allow buffer free */
+		tmpline = line;	/* Stores the pointer to allow buffer free */
 		tmp = strsep(&line, ";");
 		starttime = atoi(tmp);
 
 		if (starttime == 0) {
-            free_and_null (tmpline);
+			free_and_null(tmpline);
 			continue;
 		}
-
 		tmp = strsep(&line, ";");
 		endtime = atoi(tmp);
 
@@ -120,11 +119,11 @@ loadtimes(FILE * fp, struct timesnode * p)
 
 		p = timesnode_add(p, task, starttime, endtime);
 
-        free_and_null (task);
-        free_and_null (tmpline);
+		free_and_null(task);
+		free_and_null(tmpline);
 	}
 
-    free_and_null (readline);
+	free_and_null(readline);
 
 	return p;
 }
@@ -305,20 +304,18 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 }
 
 void
-timesnode_free (struct timesnode *p)
+timesnode_free(struct timesnode * p)
 {
-    if (p->left) {
-        timesnode_free (p->left);
-        p->left = NULL;
-    }
-
-    if (p->right) {
-        timesnode_free (p->right);
-        p->right = NULL;
-    }
-
-    free_and_null (p->task);
-    free_and_null (p);
+	if (p->left) {
+		timesnode_free(p->left);
+		p->left = NULL;
+	}
+	if (p->right) {
+		timesnode_free(p->right);
+		p->right = NULL;
+	}
+	free_and_null(p->task);
+	free_and_null(p);
 }
 
 int
@@ -392,12 +389,11 @@ default:
 
 		timesnode_print(timestree, mktime(&today));
 	}
+	fclose(fp);
 
-    fclose (fp);
+	timesnode_free(timestree);
 
-    timesnode_free (timestree);
-
-    free_and_null (nowtime);
+	free_and_null(nowtime);
 
 	return 0;
 }
