@@ -137,7 +137,7 @@ writetimes(FILE * fp, struct timesnode * p)
 	if (p->left != NULL) {
 		writetimes(fp, p->left);
 	}
-	fprintf(fp, "%ld;%ld;%s\n", p->starttime, p->endtime, p->task);
+	fprintf(fp, "%lld;%lld;%s\n", (long long) p->starttime, (long long) p->endtime, p->task);
 
 	if (p->right != NULL) {
 		writetimes(fp, p->right);
