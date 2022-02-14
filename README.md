@@ -30,6 +30,8 @@ Usage
 	still running
 	duration(hours): 0.11
 
+	total: 0.20
+
 Files
 -----
 
