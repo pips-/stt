@@ -12,9 +12,9 @@ Build & Install
 Usage
 -----
 
-	$ stt -a task # start task
-	$ stt -s      # stop task
-	$ stt [-l]    # print report
+	$ stt -a task       # start task
+	$ stt -s            # stop task
+	$ stt [-l [Y-m-d]]  # print report
 	task: task
 	started at: Wed Oct  2 19:04:04 2019
 	ended at: Wed Oct  2 19:05:04 2019

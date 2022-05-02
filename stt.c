@@ -2,6 +2,14 @@
 #define _DEFAULT_SOURCE
 #endif
 
+#ifndef _BSD_SOURCE
+#define _BSD_SOURCE
+#endif
+
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -48,7 +56,7 @@ int 		timesnode_heigh(struct timesnode *);
 int 		timesnode_getbalance(struct timesnode *);
 struct timesnode *timesnode_rightrotate(struct timesnode *);
 struct timesnode *timesnode_leftrotate(struct timesnode *);
-int 		timesnode_print(struct timesnode *, time_t);
+int 		timesnode_print(struct timesnode *, time_t aftertime, time_t beforetime);
 void 		timesnode_free(struct timesnode *);
 
 void
@@ -267,7 +275,7 @@ timesnode_stop(struct timesnode * p, time_t endtime)
 }
 
 int
-timesnode_print(struct timesnode * p, time_t aftertime)
+timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime)
 {
 	time_t         *nowtime;
 	int 		duration = 0;
@@ -277,9 +285,9 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 		return 0;
 	}
 	if (p->left != NULL) {
-		totalDuration += timesnode_print(p->left, aftertime);
+		totalDuration += timesnode_print(p->left, aftertime, beforetime);
 	}
-	if (p->starttime > aftertime || p->endtime > aftertime || p->endtime == 0) {
+	if ((p->starttime > aftertime && p->starttime < beforetime) && (p->endtime < beforetime || p->endtime == 0)) {
 		printf("task: %s\n", p->task);
 		printf("started at: %s", ctime(&p->starttime));
 
@@ -303,7 +311,7 @@ timesnode_print(struct timesnode * p, time_t aftertime)
 		totalDuration += duration;
 	}
 	if (p->right != NULL) {
-		totalDuration += timesnode_print(p->right, aftertime);
+		totalDuration += timesnode_print(p->right, aftertime, beforetime);
 	}
 	return totalDuration;
 }
@@ -328,14 +336,16 @@ main(int argc, char *argv[])
 {
 	unsigned int 	start, stop, list;
 	char           *task;
+	char           *datefilter;
 	FILE           *fp;
 	struct timesnode *timestree;
 	time_t         *nowtime;
 	int 		changed;
-	struct tm 	today;
+	struct tm 	startfilter, endfilter;
 
 	timestree = NULL;
 	task = NULL;
+	datefilter = NULL;
 	changed = start = stop = 0;
 	list = 1;
 
@@ -358,6 +368,8 @@ case 'l':			/* list task */
 		start = 0;
 		stop = 0;
 		list = 1;
+
+		datefilter = ARGF();
 		break;
 case 'v':
 		fprintf(stderr, "%s-" VERSION " © 2016 Simon Lieb, see LICENSE for details\n", argv0);
@@ -388,13 +400,25 @@ default:
 		writetimes(fp, timestree);
 	}
 	if (list) {
-		localtime_r(nowtime, &today);
+		if (datefilter != NULL) {
+			strptime(datefilter, "%Y-%m-%d", &startfilter);
+			strptime(datefilter, "%Y-%m-%d", &endfilter);
+		} else {
+			localtime_r(nowtime, &startfilter);
+			localtime_r(nowtime, &endfilter);
+		}
 
-		today.tm_sec = 0;
-		today.tm_min = 0;
-		today.tm_hour = 0;
+		startfilter.tm_sec = 0;
+		startfilter.tm_min = 0;
+		startfilter.tm_hour = 0;
+		//startfilter.tm_mday-=4;
 
-		printf("total: %.2f\n", timesnode_print(timestree, mktime(&today)) / 3600.0);
+		endfilter.tm_sec = 0;
+		endfilter.tm_min = 0;
+		endfilter.tm_hour = 0;
+		endfilter.tm_mday++;
+
+		printf("total: %.2f\n", timesnode_print(timestree, mktime(&startfilter), mktime(&endfilter)) / 3600.0);
 	}
 	fclose(fp);
 

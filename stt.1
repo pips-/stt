@@ -8,7 +8,7 @@ stt \- Simple time tracker
 .RB [ \-a
 .IR task " |"
 .RB \-s " |"
-.RB \-l ]
+.RB \-l [Y-m-d]]
 .SH DESCRIPTION
 .B stt
 keeps track of tasks during a work day.
@@ -24,9 +24,10 @@ Registers given task as active. Will also stop previous active task.
 .B \-s
 Stops current active task.
 .TP
-.B \-l
+.B \-l [Y-m-d]
 Prints day report, for each tasks name, start time, end time or state if
 still running and duration (in decimal hours) is displayed.
+Also accept a date as filter, default display today report.
 .TP
 .B \-h
 Prints synopsis help.
