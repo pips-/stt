@@ -8,7 +8,7 @@ PREFIX = /usr/local
 
 # includes and libs
 INCS =
-LIBS =
+LIBS = -lm
 
 # flags
 CPPFLAGS = -DVERSION=\"${VERSION}\"

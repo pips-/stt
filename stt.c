@@ -18,6 +18,7 @@
 #include <pwd.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 #include "arg.h"
 
@@ -56,7 +57,7 @@ int 		timesnode_heigh(struct timesnode *);
 int 		timesnode_getbalance(struct timesnode *);
 struct timesnode *timesnode_rightrotate(struct timesnode *);
 struct timesnode *timesnode_leftrotate(struct timesnode *);
-int 		timesnode_print(struct timesnode *, time_t aftertime, time_t beforetime, int showinprogress);
+float 		timesnode_print(struct timesnode *, time_t aftertime, time_t beforetime, int showinprogress);
 void 		timesnode_free(struct timesnode *);
 
 void
@@ -274,12 +275,12 @@ timesnode_stop(struct timesnode * p, time_t endtime)
 	return p;
 }
 
-int
+float
 timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime, int showinprogress)
 {
 	time_t         *nowtime;
-	int 		duration = 0;
-	int 		totalDuration = 0;
+	float 		duration = 0.0;
+	float 		totalDuration = 0.0;
 
 	if (p == NULL) {
 		return 0;
@@ -298,17 +299,19 @@ timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime, int s
 		if (p->endtime != 0) {
 			printf("ended at: %s", ctime(&p->endtime));
 
-			duration = difftime(p->endtime, p->starttime);
+			duration = difftime(p->endtime, p->starttime) / 3600.0;
+			duration = roundf(100.0 * duration) / 100.0;
 
-			printf("duration(hours): %.2f\n\n", duration / 3600.0);
+			printf("duration(hours): %.2f\n\n", duration);
 		} else {
 			nowtime = malloc(sizeof(time_t));
 			time(nowtime);
 			printf("still running\n");
 
-			duration = difftime(*nowtime, p->starttime);
+			duration = difftime(*nowtime, p->starttime) / 3600.0;
+			duration = roundf(100.0 * duration) / 100.0;
 
-			printf("duration(hours): %.2f\n\n", duration / 3600.0);
+			printf("duration(hours): %.2f\n\n", duration);
 			free(nowtime);
 		}
 
@@ -434,7 +437,7 @@ default:
 		endfilter.tm_hour = 0;
 		endfilter.tm_mday++;
 
-		printf("total: %.2f\n", timesnode_print(timestree, mktime(&startfilter), mktime(&endfilter), mktime(&startfilter) == mktime(&today)) / 3600.0);
+		printf("total: %.2f\n", timesnode_print(timestree, mktime(&startfilter), mktime(&endfilter), mktime(&startfilter) == mktime(&today)));
 	}
 	fclose(fp);
 
