@@ -56,7 +56,7 @@ int 		timesnode_heigh(struct timesnode *);
 int 		timesnode_getbalance(struct timesnode *);
 struct timesnode *timesnode_rightrotate(struct timesnode *);
 struct timesnode *timesnode_leftrotate(struct timesnode *);
-int 		timesnode_print(struct timesnode *, time_t aftertime, time_t beforetime);
+int 		timesnode_print(struct timesnode *, time_t aftertime, time_t beforetime, int showinprogress);
 void 		timesnode_free(struct timesnode *);
 
 void
@@ -275,7 +275,7 @@ timesnode_stop(struct timesnode * p, time_t endtime)
 }
 
 int
-timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime)
+timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime, int showinprogress)
 {
 	time_t         *nowtime;
 	int 		duration = 0;
@@ -285,9 +285,13 @@ timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime)
 		return 0;
 	}
 	if (p->left != NULL) {
-		totalDuration += timesnode_print(p->left, aftertime, beforetime);
+		totalDuration += timesnode_print(p->left, aftertime, beforetime, showinprogress);
 	}
-	if ((p->starttime > aftertime && p->starttime < beforetime) && (p->endtime < beforetime || p->endtime == 0)) {
+	if ((p->starttime > aftertime && p->starttime < beforetime) ||
+	    (p->endtime > aftertime && p->endtime < beforetime) ||
+	    (p->starttime < aftertime && p->endtime > beforetime) ||
+	    (showinprogress && p->endtime == 0)) {
+
 		printf("task: %s\n", p->task);
 		printf("started at: %s", ctime(&p->starttime));
 
@@ -311,7 +315,7 @@ timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime)
 		totalDuration += duration;
 	}
 	if (p->right != NULL) {
-		totalDuration += timesnode_print(p->right, aftertime, beforetime);
+		totalDuration += timesnode_print(p->right, aftertime, beforetime, showinprogress);
 	}
 	return totalDuration;
 }
@@ -341,7 +345,7 @@ main(int argc, char *argv[])
 	struct timesnode *timestree;
 	time_t         *nowtime;
 	int 		changed;
-	struct tm 	startfilter, endfilter;
+	struct tm 	startfilter, endfilter, today;
 
 	timestree = NULL;
 	task = NULL;
@@ -400,6 +404,10 @@ default:
 		writetimes(fp, timestree);
 	}
 	if (list) {
+		memset(&startfilter, 0, sizeof(struct tm));
+		memset(&endfilter, 0, sizeof(struct tm));
+		memset(&today, 0, sizeof(struct tm));
+
 		if (datefilter != NULL) {
 			strptime(datefilter, "%Y-%m-%d", &startfilter);
 			strptime(datefilter, "%Y-%m-%d", &endfilter);
@@ -408,17 +416,25 @@ default:
 			localtime_r(nowtime, &endfilter);
 		}
 
+		localtime_r(nowtime, &today);
+
+		today.tm_sec = 0;
+		today.tm_min = 0;
+		today.tm_hour = 0;
+		today.tm_isdst = 0;
+
+
 		startfilter.tm_sec = 0;
 		startfilter.tm_min = 0;
 		startfilter.tm_hour = 0;
-		//startfilter.tm_mday-=4;
+		startfilter.tm_isdst = 0;
 
 		endfilter.tm_sec = 0;
 		endfilter.tm_min = 0;
 		endfilter.tm_hour = 0;
 		endfilter.tm_mday++;
 
-		printf("total: %.2f\n", timesnode_print(timestree, mktime(&startfilter), mktime(&endfilter)) / 3600.0);
+		printf("total: %.2f\n", timesnode_print(timestree, mktime(&startfilter), mktime(&endfilter), mktime(&startfilter) == mktime(&today)) / 3600.0);
 	}
 	fclose(fp);
 
