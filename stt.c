@@ -300,20 +300,20 @@ timesnode_print(struct timesnode * p, time_t aftertime, time_t beforetime, int s
 			printf("ended at: %s", ctime(&p->endtime));
 
 			duration = difftime(p->endtime, p->starttime) / 3600.0;
-			duration = roundf(100.0 * duration) / 100.0;
-
-			printf("duration(hours): %.2f\n\n", duration);
 		} else {
-			nowtime = malloc(sizeof(time_t));
-			time(nowtime);
 			printf("still running\n");
 
-			duration = difftime(*nowtime, p->starttime) / 3600.0;
-			duration = roundf(100.0 * duration) / 100.0;
+			nowtime = malloc(sizeof(time_t));
+			time(nowtime);
 
-			printf("duration(hours): %.2f\n\n", duration);
+			duration = difftime(*nowtime, p->starttime) / 3600.0;
+
 			free(nowtime);
 		}
+
+		duration = roundf(100.0 * duration) / 100.0;
+
+		printf("duration(hours): %.2f\n\n", duration);
 
 		totalDuration += duration;
 	}
